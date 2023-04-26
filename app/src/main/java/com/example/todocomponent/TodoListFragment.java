@@ -1,5 +1,6 @@
 package com.example.todocomponent;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,8 +10,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -33,8 +39,7 @@ public class TodoListFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+
      * @return A new instance of fragment TodoListFragment.
      */
     // TODO: Rename and change types and number of parameters
@@ -48,6 +53,7 @@ public class TodoListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
     }
 
@@ -63,9 +69,54 @@ public class TodoListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         recyclerView = view.findViewById(R.id.todo_list_rv);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         todoModel = TodoModel.getInstance();
-        adapter = new TodoAdapter(todoModel.getTodosList());
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
+        updateUI();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
+    private void updateUI(){
+
+        TodoModel todoModel = TodoModel.getInstance();
+        ArrayList<Todo> todos = todoModel.getTodosList();
+
+        if (adapter == null) {
+            adapter = new TodoAdapter(todos, getActivity());
+            recyclerView.setAdapter(adapter);
+        } else {
+            adapter.notifyDataSetChanged();
+        }
+
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_todo_list, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.new_todo:
+
+                Todo todo = new Todo();
+                todo.setDetail("");
+                TodoModel.getInstance().addTodo(todo);
+
+                Intent intent = TodoPagerActivity.makeIntent(getActivity(), todo.getId());
+                //              Intent intent = TodoActivity.newIntent(getActivity(), todo.getId());
+                startActivity(intent);
+
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

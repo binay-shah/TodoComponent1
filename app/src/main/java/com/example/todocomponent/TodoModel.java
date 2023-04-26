@@ -42,6 +42,9 @@ public class TodoModel {
     }
 
     public void addTodo(Todo todo){
+        todo.setTitle("Todo title: "+ (todosList.size()+1));
+        todo.setDetail("Todo description: " + (todosList.size()+1));
+
         todosList.add(todo);
     }
 
